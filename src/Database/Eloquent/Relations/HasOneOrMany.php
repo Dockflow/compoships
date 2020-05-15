@@ -24,10 +24,16 @@ trait HasOneOrMany
                 $allParentKeyValuesAreNull = array_unique($parentKeyValue) === [null];
 
                 foreach ($this->foreignKey as $index => $key) {
+                    $rsign = '=';
+                    if(is_array($key)){
+                        // If the FK is in itself again an array, the first part is the relationship sign (=,>,<,...) and the second part is actual FK
+                        $rsign=$key[0];
+                        $key = $key[1];
+                    }
                     list(, $key) = explode('.', $key);
                     $fullKey = $this->getRelated()
                             ->getTable().'.'.$key;
-                    $this->query->where($fullKey, '=', $parentKeyValue[$index]);
+                    $this->query->where($fullKey, $rsign, $parentKeyValue[$index]);
 
                     if ($allParentKeyValuesAreNull) {
                         $this->query->whereNotNull($fullKey);
